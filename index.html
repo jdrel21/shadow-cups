@@ -363,8 +363,14 @@ async function pick(cup){
      picked:pickedIndex
    })
  });
+ if(!res.ok){
+ alert("Eroare server: " + res.status);
+ return;
+ }
 
  const data = await res.json();
+
+ alert(JSON.stringify(data));
 
  coins = data.coins;
 
