@@ -306,9 +306,6 @@ function startRound(){
  resetCups();
  attachBall(cups[Math.floor(Math.random()*3)]);
 
- coins-=bet;
- updateHUD();
- save();
  msg('Urmărește bila...');
 
  const lvl=document.getElementById('level').value;
@@ -348,29 +345,40 @@ async function pick(cup){
  cup.classList.add('lift');
  document.getElementById('ball').style.opacity=1;
 
- let multi=3;
- const lvl=document.getElementById('level').value;
- if(lvl==='medium') multi=5;
- if(lvl==='hard') multi=10;
+ const pickedIndex = cups.indexOf(cup);
 
- if(cup===ballCup){
-  const win=bet*multi;
-  coins+=win;
-  wins++;
+ const { data:{session} } = await sb.auth.getSession();
 
-  document.getElementById('winSound').play();
-  cup.classList.add('glow');
-  if(navigator.vibrate) navigator.vibrate(120);
+ const res = await fetch(
+ "https://pakagqkhpwzcqrluyarw.supabase.co/functions/v1/play-round",
+ {
+   method:"POST",
+   headers:{
+     "Content-Type":"application/json",
+     "Authorization":"Bearer "+session.access_token
+   },
+   body:JSON.stringify({
+     bet,
+     level:document.getElementById('level').value,
+     picked:pickedIndex
+   })
+ });
 
-  msg('🔥 AI CÂȘTIGAT '+win);
+ const data = await res.json();
+
+ coins = data.coins;
+
+ if(data.result){
+   wins++;
+   cups[data.winningCup].classList.add('glow');
+   msg('🔥 AI CÂȘTIGAT');
  }else{
-  loss++;
-  ballCup.classList.add('lift');
-  msg('❌ Ai pierdut');
+   loss++;
+   cups[data.winningCup].classList.add('lift');
+   msg('❌ Ai pierdut');
  }
 
  updateHUD();
- await save();
-}
+ }
 
 </script></body></html>
