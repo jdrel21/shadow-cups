@@ -349,6 +349,11 @@ async function pick(cup){
  const pickedIndex = cups.indexOf(cup);
 
  const { data:{session} } = await sb.auth.getSession();
+ 
+ if(!session){
+ alert("Session NULL");
+ return;
+ }
 
  const res = await fetch(
  "https://pakagqkhpwzcqrluyarw.supabase.co/functions/v1/play-round",
