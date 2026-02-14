@@ -15,12 +15,11 @@ body{
  display:flex;
  justify-content:center;
  align-items:center;
- overflow-x:hidden;
 }
 
 .panel{
- width:1400px; /* mai lat */
- max-width:99vw;
+ width:100%;
+ max-width:1400px;
  background:linear-gradient(160deg,#0b2a3d,#04141c);
  border-radius:26px;
  padding:26px;
@@ -60,22 +59,25 @@ button:active{transform:scale(.96)}
  margin-bottom:18px;
 }
 
-/* MASA MULT MAI LARGA SI MAI INALTA */
+/* MASA RESPONSIVE FULL WIDTH */
 .table{
  position:relative;
- height:650px;
- margin:80px 0;
+ width:100%;
+ min-height:420px;
+ height:60vh;
+ max-height:750px;
+ margin:60px 0;
  border-radius:60px;
  background:radial-gradient(circle at center,#0a6c94,#010b12);
  overflow:hidden;
 }
 
-/* PAHARE SI MAI MICI */
+/* PAHARE MAI MICI */
 .cup{
  width:55px;
  height:85px;
  position:absolute;
- bottom:230px;
+ bottom:22%;
  border-radius:45px 45px 0 0;
  background:linear-gradient(#ffc46b,#ff6d00);
  box-shadow:0 10px 25px rgba(0,0,0,.8);
@@ -85,14 +87,14 @@ button:active{transform:scale(.96)}
 .glow{ box-shadow:0 0 25px gold,0 0 50px orange; }
 .lift{ transform:translateY(-65px); }
 
-/* BILA SI MAI MICA */
+/* BILA */
 .ball{
  width:14px;
  height:14px;
  border-radius:50%;
  background:radial-gradient(circle,#fff,#ff1744);
  position:absolute;
- bottom:215px;
+ bottom:19%;
  transition:left .5s cubic-bezier(.4,0,.2,1), opacity .2s;
 }
 
@@ -120,6 +122,14 @@ button:active{transform:scale(.96)}
  margin-top:20px;
  background:linear-gradient(90deg,#6200ea,#aa00ff);
 }
+
+/* MOBILE FIX */
+@media (max-width:900px){
+ .panel{max-width:100%;border-radius:0}
+ .side-video{display:none}
+ .table{height:55vh;min-height:350px}
+}
+
 </style></head><body><div id="auth" class="panel">
 <h1>🎰 Shadow Cups</h1>
 <input id="email" placeholder="Email">
@@ -213,6 +223,7 @@ function updateHUD(){
  document.getElementById('wins').innerText=wins;
  document.getElementById('loss').innerText=loss;
 }
+
 function msg(t){ document.getElementById('msg').innerText=t; }
 function setBet(v){bet=v;msg("Pariu: "+v);} 
 function allIn(){bet=coins;msg("ALL IN");}
@@ -232,7 +243,8 @@ function createCups(){
  cups=[]; slots=[];
 
  const count=getCupCount();
- const spacing=table.offsetWidth/(count+1);
+ const width=table.clientWidth;
+ const spacing=width/(count+1);
 
  for(let i=0;i<count;i++){
   const pos=spacing*(i+1)-27;
@@ -323,6 +335,8 @@ async function pick(cup,multi){
  updateHUD();
  await sb.from('players').update({coins,wins,loss}).eq('id',userData.id);
 }
+
+window.addEventListener('resize',createCups);
 
 </script></body>
 </html>
