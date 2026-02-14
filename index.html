@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Casino Production NEXT</title>
+<title>Casino Production</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 
@@ -19,7 +19,6 @@ body{
  display:flex;
  justify-content:center;
  align-items:center;
- overflow-x:hidden;
 }
 
 .panel{
@@ -27,7 +26,7 @@ body{
  max-width:94vw;
  background:linear-gradient(160deg,#0b2a3d,#04141c);
  border-radius:26px;
- padding:22px;
+ padding:26px;
  box-shadow:0 60px 180px rgba(0,0,0,.95);
 }
 
@@ -38,7 +37,7 @@ input,select{
  padding:14px;
  border:none;
  border-radius:14px;
- margin:10px 0;
+ margin:14px 0;
 }
 
 button{
@@ -50,22 +49,27 @@ button{
  cursor:pointer;
  background:linear-gradient(90deg,#00e676,#00c853);
  transition:.2s;
+ margin-top:14px;
 }
 
 button:active{transform:scale(.96)}
 .secondary{background:#ff5252}
 
+.auth-buttons button{
+ margin-top:18px;
+}
+
 .topbar{
  display:flex;
  justify-content:space-between;
  font-weight:bold;
- margin-bottom:12px;
+ margin-bottom:18px;
 }
 
 .table{
  position:relative;
  height:240px;
- margin:25px 0;
+ margin:30px 0;
  border-radius:20px;
  background:radial-gradient(circle,#063a52,#010b12);
  overflow:hidden;
@@ -82,17 +86,11 @@ button:active{transform:scale(.96)}
  transition:left .35s ease, transform .25s ease;
 }
 
-.glow{box-shadow:0 0 25px gold,0 0 50px orange}
+.glow{
+ box-shadow:0 0 25px gold,0 0 50px orange;
+}
+
 .lift{transform:translateY(-70px)}
-
-.vip{
- animation:vipPulse 1s infinite alternate;
-}
-
-@keyframes vipPulse{
- from{box-shadow:0 0 15px gold}
- to{box-shadow:0 0 40px orange}
-}
 
 .ball{
  width:26px;
@@ -104,28 +102,42 @@ button:active{transform:scale(.96)}
  transition:left .35s ease, opacity .2s;
 }
 
-.bet-row{display:flex;gap:14px;margin-top:14px}
-.bet-row button{flex:1}
-
-.stats{display:flex;justify-content:space-between;margin-top:10px}
-.msg{text-align:center;font-weight:bold;margin-top:12px}
-
-.leaderboard{
- margin-top:15px;
- font-size:13px;
- opacity:.9;
+.bet-row{
+ display:flex;
+ gap:18px;
+ margin-top:20px;
 }
 
+.bet-row button{
+ flex:1;
+}
+
+.stats{
+ display:flex;
+ justify-content:space-between;
+ margin-top:18px;
+}
+
+.msg{
+ text-align:center;
+ font-weight:bold;
+ margin-top:16px;
+}
 </style>
 </head>
+
 <body>
 
 <div id="auth" class="panel">
 <h1>🎰 Casino Production</h1>
+
 <input id="email" placeholder="Email">
-<input id="pass" type="password" placeholder="Parolă">
+<input id="pass" type="password" placeholder="Parolă (min 6)">
+
+<div class="auth-buttons">
 <button onclick="register()">Înregistrare</button>
 <button onclick="login()">Login</button>
+</div>
 </div>
 
 <div id="game" class="panel hidden">
@@ -152,8 +164,8 @@ button:active{transform:scale(.96)}
 <button onclick="allIn()">ALL IN</button>
 </div>
 
-<button style="margin-top:16px" onclick="startRound()">START</button>
-<button class="secondary" style="margin-top:10px" onclick="logout()">Logout</button>
+<button onclick="startRound()">START</button>
+<button class="secondary" onclick="logout()">Logout</button>
 
 <div class="stats">
 <div>Victorii: <span id="wins">0</span></div>
@@ -162,20 +174,10 @@ button:active{transform:scale(.96)}
 
 <div class="msg" id="msg"></div>
 
-<div class="leaderboard">
-<h3>🏆 Top 5</h3>
-<div id="leaderboard"></div>
-</div>
-
-<div style="font-size:12px;opacity:.6;margin-top:10px">
-Sistem anti-cheat activ. Manipularea codului duce la blocarea contului.
-</div>
-
 </div>
 
 <audio id="winSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3"></audio>
 <audio id="shuffleSound" src="https://assets.mixkit.co/sfx/preview/mixkit-card-shuffle-2036.mp3"></audio>
-<audio id="bgSound" src="https://assets.mixkit.co/sfx/preview/mixkit-casino-ambience-ambient-1132.mp3" loop></audio>
 
 <script>
 
@@ -187,42 +189,80 @@ const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let userData=null;
 let coins=0,wins=0,loss=0;
 let cups=[],slots=[],ballCup=null,playing=false,bet=5000;
-let lastRound=0;
+
+//////////////// AUTH //////////////////
 
 async function register(){
- const email=emailInput();
- const pass=passInput();
- await sb.auth.signUp({email,password:pass});
- alert("Verifică emailul.");
+ const email=document.getElementById('email').value.trim();
+ const pass=document.getElementById('pass').value.trim();
+
+ if(pass.length<6) return alert("Parolă minim 6 caractere");
+
+ const {error}=await sb.auth.signUp({email,password:pass});
+ if(error) return alert(error.message);
+
+ alert("Cont creat. Verifică emailul dacă ai confirmare activată.");
 }
 
 async function login(){
- const email=emailInput();
- const pass=passInput();
- await sb.auth.signInWithPassword({email,password:pass});
+ const email=document.getElementById('email').value.trim();
+ const pass=document.getElementById('pass').value.trim();
+
+ const {error}=await sb.auth.signInWithPassword({email,password:pass});
+ if(error) return alert(error.message);
+
  initGame();
 }
 
-function emailInput(){return document.getElementById('email').value}
-function passInput(){return document.getElementById('pass').value}
+async function logout(){
+ await sb.auth.signOut();
+ location.reload();
+}
+
+//////////////// RESTORE SESSION //////////////////
+
+sb.auth.onAuthStateChange((event,session)=>{
+ if(session?.user){
+  initGame();
+ }
+});
+
+async function checkSession(){
+ const {data:{session}}=await sb.auth.getSession();
+ if(session?.user){
+  initGame();
+ }
+}
+
+checkSession();
+
+//////////////// GAME INIT //////////////////
 
 async function initGame(){
  const {data:{user}}=await sb.auth.getUser();
- if(!user)return;
+ if(!user) return;
 
  userData=user;
+
  document.getElementById('auth').classList.add('hidden');
  document.getElementById('game').classList.remove('hidden');
 
- let {data}=await sb.from('players')
- .select('*').eq('id',user.id).maybeSingle();
+ let {data}=await sb
+  .from('players')
+  .select('*')
+  .eq('id',user.id)
+  .maybeSingle();
 
  if(!data){
-   await sb.from('players').insert({
-     id:user.id,email:user.email,
-     coins:100000,wins:0,loss:0
-   });
-   return initGame();
+  await sb.from('players').insert({
+   id:user.id,
+   email:user.email,
+   coins:100000,
+   wins:0,
+   loss:0
+  });
+
+  return initGame();
  }
 
  coins=data.coins;
@@ -231,12 +271,9 @@ async function initGame(){
 
  updateHUD();
  createCups();
- dailyBonus();
- loadLeaderboard();
-
- document.getElementById("bgSound").volume=.2;
- document.getElementById("bgSound").play();
 }
+
+//////////////// HUD //////////////////
 
 function updateHUD(){
  document.getElementById('coins').innerText=coins;
@@ -244,55 +281,34 @@ function updateHUD(){
  document.getElementById('loss').innerText=loss;
 }
 
-function msg(t){document.getElementById('msg').innerText=t}
+function msg(t){
+ document.getElementById('msg').innerText=t;
+}
 
-function setBet(v){bet=v;msg("Pariu "+v)}
-function allIn(){bet=coins;msg("ALL IN")}
+//////////////// GAME //////////////////
+
+function setBet(v){bet=v;msg("Pariu: "+v);}
+function allIn(){bet=coins;msg("ALL IN");}
 
 function createCups(){
  const table=document.getElementById('table');
  table.querySelectorAll('.cup').forEach(c=>c.remove());
- cups=[];slots=[];
+ cups=[];
+ slots=[];
+
  const spacing=table.offsetWidth/4;
 
  for(let i=0;i<3;i++){
   const pos=spacing*(i+1)-42;
   slots.push(pos);
+
   const cup=document.createElement('div');
   cup.className='cup';
   cup.style.left=pos+'px';
+
   table.appendChild(cup);
   cups.push(cup);
  }
-}
-
-function startRound(){
- if(playing)return;
- if(Date.now()-lastRound<2000)return msg("Așteaptă...");
- lastRound=Date.now();
- if(coins<bet)return msg("Nu ai coins");
-
- resetCups();
- attachBall(cups[Math.floor(Math.random()*3)]);
- coins-=bet;
- updateHUD();
- msg("Urmărește bila...");
-
- setTimeout(()=>{
-  hideBall();
-  document.getElementById('shuffleSound').play();
-  let i=0;
-  const loop=setInterval(()=>{
-   shuffleArray();
-   i++;
-   if(i>=10){
-    clearInterval(loop);
-    playing=true;
-    msg("Alege un pahar!");
-    cups.forEach(c=>c.onclick=()=>pick(c));
-   }
-  },250);
- },800);
 }
 
 function attachBall(cup){
@@ -306,34 +322,82 @@ function moveBall(){
  document.getElementById('ball').style.left=(slots[index]+30)+'px';
 }
 
-function hideBall(){document.getElementById('ball').style.opacity=0}
-function resetCups(){cups.forEach(c=>c.classList.remove('lift','glow','vip'))}
+function hideBall(){
+ document.getElementById('ball').style.opacity=0;
+}
+
+function resetCups(){
+ cups.forEach(c=>c.classList.remove('lift','glow'));
+}
 
 function shuffleArray(){
  for(let i=cups.length-1;i>0;i--){
   const j=Math.floor(Math.random()*(i+1));
   [cups[i],cups[j]]=[cups[j],cups[i]];
  }
- cups.forEach((cup,index)=>cup.style.left=slots[index]+'px');
+
+ cups.forEach((cup,index)=>{
+  cup.style.left=slots[index]+'px';
+ });
+
  moveBall();
 }
 
+function startRound(){
+ if(playing) return;
+ if(coins<bet) return msg("Nu ai coins");
+
+ resetCups();
+ attachBall(cups[Math.floor(Math.random()*3)]);
+
+ coins-=bet;
+ updateHUD();
+ msg("Urmărește bila...");
+
+ const lvl=document.getElementById('level').value;
+ let speed=260,times=10;
+
+ if(lvl==='easy'){speed=420;times=6;}
+ if(lvl==='hard'){speed=200;times=14;}
+
+ setTimeout(()=>{
+  hideBall();
+  document.getElementById('shuffleSound').play();
+
+  let i=0;
+  const loop=setInterval(()=>{
+   shuffleArray();
+   i++;
+   if(i>=times){
+    clearInterval(loop);
+    playing=true;
+    msg("Alege un pahar!");
+    cups.forEach(c=>c.onclick=()=>pick(c));
+   }
+  },speed);
+
+ },900);
+}
+
 async function pick(cup){
- if(!playing)return;
+ if(!playing) return;
  playing=false;
+ resetCups();
 
  cup.classList.add('lift');
  document.getElementById('ball').style.opacity=1;
 
- let multi=document.getElementById('level').value==="hard"?10:
- document.getElementById('level').value==="medium"?5:3;
+ let multi=3;
+ const lvl=document.getElementById('level').value;
+ if(lvl==='medium') multi=5;
+ if(lvl==='hard') multi=10;
 
  if(cup===ballCup){
   const win=bet*multi;
   coins+=win;
   wins++;
-  cup.classList.add('glow','vip');
   document.getElementById('winSound').play();
+  cup.classList.add('glow');
   msg("🔥 AI CÂȘTIGAT "+win);
  }else{
   loss++;
@@ -342,32 +406,10 @@ async function pick(cup){
  }
 
  updateHUD();
+
  await sb.from('players')
- .update({coins,wins,loss})
- .eq('id',userData.id);
-
- loadLeaderboard();
-}
-
-async function loadLeaderboard(){
- const {data}=await sb.from('players')
- .select('email,wins')
- .order('wins',{ascending:false})
- .limit(5);
-
- let html="";
- data.forEach(p=>html+=`<div>${p.email} - ${p.wins} wins</div>`);
- document.getElementById('leaderboard').innerHTML=html;
-}
-
-function dailyBonus(){
- const today=new Date().toDateString();
- if(localStorage.getItem("bonus")!==today){
-  coins+=1000;
-  localStorage.setItem("bonus",today);
-  msg("🎁 Daily Bonus +1000");
-  updateHUD();
- }
+  .update({coins,wins,loss})
+  .eq('id',userData.id);
 }
 
 </script>
