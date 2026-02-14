@@ -19,8 +19,8 @@ body{
 }
 
 .panel{
- width:900px;
- max-width:96vw;
+ width:1100px;
+ max-width:98vw;
  background:linear-gradient(160deg,#0b2a3d,#04141c);
  border-radius:26px;
  padding:26px;
@@ -60,38 +60,39 @@ button:active{transform:scale(.96)}
  margin-bottom:18px;
 }
 
+/* MASA MULT MAI MARE */
 .table{
  position:relative;
- height:300px;
- margin:30px 0;
- border-radius:30px;
- background:radial-gradient(circle at center,#074f6d,#010b12);
+ height:420px;
+ margin:40px 0;
+ border-radius:40px;
+ background:radial-gradient(circle at center,#0a6c94,#010b12);
  overflow:hidden;
  transition:all .3s ease;
 }
 
 .cup{
- width:85px;
- height:120px;
+ width:95px;
+ height:140px;
  position:absolute;
- bottom:70px;
- border-radius:80px 80px 0 0;
+ bottom:100px;
+ border-radius:90px 90px 0 0;
  background:linear-gradient(#ffc46b,#ff6d00);
- box-shadow:0 12px 30px rgba(0,0,0,.7);
- transition:left .45s cubic-bezier(.4,0,.2,1), transform .25s ease;
+ box-shadow:0 18px 40px rgba(0,0,0,.8);
+ transition:left .5s cubic-bezier(.4,0,.2,1), transform .25s ease;
 }
 
-.glow{ box-shadow:0 0 25px gold,0 0 50px orange; }
-.lift{ transform:translateY(-80px); }
+.glow{ box-shadow:0 0 30px gold,0 0 60px orange; }
+.lift{ transform:translateY(-110px); }
 
 .ball{
- width:28px;
- height:28px;
+ width:32px;
+ height:32px;
  border-radius:50%;
  background:radial-gradient(circle,#fff,#ff1744);
  position:absolute;
- bottom:50px;
- transition:left .45s cubic-bezier(.4,0,.2,1), opacity .2s;
+ bottom:75px;
+ transition:left .5s cubic-bezier(.4,0,.2,1), opacity .2s;
 }
 
 .bet-row{ display:flex; gap:18px; margin-top:20px; }
@@ -100,16 +101,15 @@ button:active{transform:scale(.96)}
 .stats{ display:flex; justify-content:space-between; margin-top:18px; }
 .msg{ text-align:center; font-weight:bold; margin-top:16px; }
 
-/* SIDE VIDEO THUMBNAILS */
 .side-video{
  position:absolute;
  top:50%;
  transform:translateY(-50%);
- width:160px;
- opacity:.4;
+ width:200px;
+ opacity:.35;
 }
-.left-video{ left:-190px; }
-.right-video{ right:-190px; }
+.left-video{ left:-240px; }
+.right-video{ right:-240px; }
 .side-video video{
  width:100%;
  border-radius:20px;
@@ -234,7 +234,7 @@ function createCups(){
  const spacing=table.offsetWidth/(count+1);
 
  for(let i=0;i<count;i++){
-  const pos=spacing*(i+1)-42;
+  const pos=spacing*(i+1)-47; // distanță vizibil mai mare
   slots.push(pos);
   const cup=document.createElement('div');
   cup.className='cup';
@@ -245,13 +245,13 @@ function createCups(){
 }
 
 function attachBall(cup){ ballCup=cup; moveBall(); document.getElementById('ball').style.opacity=1; }
-function moveBall(){ const index=cups.indexOf(ballCup); document.getElementById('ball').style.left=(slots[index]+30)+'px'; }
+function moveBall(){ const index=cups.indexOf(ballCup); document.getElementById('ball').style.left=(slots[index]+32)+'px'; }
 function hideBall(){ document.getElementById('ball').style.opacity=0; }
 function resetCups(){ cups.forEach(c=>c.classList.remove('lift','glow')); }
 
 function shuffleArray(){
  const count=cups.length;
- const swaps=count*2;
+ const swaps=count*3;
  for(let i=0;i<swaps;i++){
   const a=Math.floor(Math.random()*count);
   const b=Math.floor(Math.random()*count);
@@ -280,7 +280,7 @@ function startRound(){
  if(lvl==='extreme'){speed=160;times=24;multi=15;}
  if(lvl==='insane'){speed=130;times=28;multi=20;}
 
- speed=Math.floor(speed*0.85); // 15% faster
+ speed=Math.floor(speed*0.85);
 
  setTimeout(()=>{
   hideBall();
