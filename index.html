@@ -1,342 +1,899 @@
-<!DOCTYPE html><html lang="ro">
+<!DOCTYPE html>
+<html lang="ro">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shadow Cups</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script><style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-
-body{
- margin:0;
- font-family:'Segoe UI',sans-serif;
- background:radial-gradient(circle at top,#021018,#000);
- color:white;
- min-height:100vh;
- display:flex;
- justify-content:center;
- align-items:center;
+<title>Shadow Cups - Premium Casino Game</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  margin: 0;
+  padding: 0;
 }
 
-.panel{
- width:100%;
- max-width:1400px;
- background:linear-gradient(160deg,#0b2a3d,#04141c);
- border-radius:26px;
- padding:26px;
- box-shadow:0 60px 180px rgba(0,0,0,.95);
- position:relative;
+:root {
+  --gold: #D4AF37;
+  --gold-light: #F3E5AB;
+  --gold-dark: #a18216;
+  --bg-dark: #09090b;
+  --bg-card: #18181b;
+  --felt-dark: #05180f;
+  --felt-light: #0f331e;
+  --red: #dc2626;
+  --green: #16a34a;
+  --text-primary: #fafafa;
+  --text-secondary: #a1a1aa;
+  --text-muted: #52525b;
 }
 
-.hidden{display:none}
-
-input,select{
- width:100%;
- padding:14px;
- border:none;
- border-radius:14px;
- margin:14px 0;
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
-button{
- width:100%;
- padding:16px;
- border:none;
- border-radius:16px;
- font-weight:bold;
- cursor:pointer;
- background:linear-gradient(90deg,#00e676,#00c853);
- transition:.2s;
- margin-top:14px;
+/* ========== BACKGROUND PARTICLES ========== */
+.particles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
 }
 
-button:active{transform:scale(.96)}
-.secondary{background:#ff5252}
-
-.topbar{
- display:flex;
- justify-content:space-between;
- font-weight:bold;
- margin-bottom:18px;
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--gold);
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: float 15s infinite;
 }
 
-/* MASA RESPONSIVE FULL WIDTH */
-.table{
- position:relative;
- width:100%;
- min-height:420px;
- height:60vh;
- max-height:750px;
- margin:60px 0;
- border-radius:60px;
- background:radial-gradient(circle at center,#0a6c94,#010b12);
- overflow:hidden;
+@keyframes float {
+  0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.3; }
+  90% { opacity: 0.3; }
+  100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
 }
 
-/* PAHARE MAI MICI */
-.cup{
- width:55px;
- height:85px;
- position:absolute;
- bottom:22%;
- border-radius:45px 45px 0 0;
- background:linear-gradient(#ffc46b,#ff6d00);
- box-shadow:0 10px 25px rgba(0,0,0,.8);
- transition:left .5s cubic-bezier(.4,0,.2,1), transform .25s ease;
+/* ========== GLASS EFFECT ========== */
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.glow{ box-shadow:0 0 25px gold,0 0 50px orange; }
-.lift{ transform:translateY(-65px); }
-
-/* BILA */
-.ball{
- width:14px;
- height:14px;
- border-radius:50%;
- background:radial-gradient(circle,#fff,#ff1744);
- position:absolute;
- bottom:19%;
- transition:left .5s cubic-bezier(.4,0,.2,1), opacity .2s;
+/* ========== AUTH PANEL ========== */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
 }
 
-.bet-row{ display:flex; gap:18px; margin-top:20px; }
-.bet-row button{ flex:1; }
-
-.stats{ display:flex; justify-content:space-between; margin-top:18px; }
-.msg{ text-align:center; font-weight:bold; margin-top:16px; }
-
-.side-video{
- position:absolute;
- top:50%;
- transform:translateY(-50%);
- width:200px;
- opacity:.35;
-}
-.left-video{ left:-240px; }
-.right-video{ right:-240px; }
-.side-video video{
- width:100%;
- border-radius:20px;
+.auth-panel {
+  width: 100%;
+  max-width: 420px;
+  padding: 48px;
+  border-radius: 32px;
+  text-align: center;
 }
 
-.donate{
- margin-top:20px;
- background:linear-gradient(90deg,#6200ea,#aa00ff);
+.auth-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 3.5rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--gold), var(--gold-light), var(--gold));
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s ease infinite;
+  margin-bottom: 8px;
 }
 
-/* MOBILE FIX */
-@media (max-width:900px){
- .panel{max-width:100%;border-radius:0}
- .side-video{display:none}
- .table{height:55vh;min-height:350px}
+@keyframes shimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-</style></head><body><div id="auth" class="panel">
-<h1>🎰 Shadow Cups</h1>
-<input id="email" placeholder="Email">
-<input id="pass" type="password" placeholder="Parolă (min 6)">
-<button onclick="register()">Înregistrare</button>
-<button onclick="login()">Login</button>
-</div><div id="game" class="panel hidden"><div class="side-video left-video">
-<video autoplay muted loop playsinline>
-<source src="https://cdn.coverr.co/videos/coverr-casino-table-1605/1080p.mp4" type="video/mp4">
-</video>
-</div><div class="side-video right-video">
-<video autoplay muted loop playsinline>
-<source src="https://cdn.coverr.co/videos/coverr-casino-table-1605/1080p.mp4" type="video/mp4">
-</video>
-</div><div class="topbar">
-<div>💰 Coins: <span id="coins">0</span></div>
-<select id="level" onchange="createCups()">
-<option value="easy">Easy x3</option>
-<option value="medium">Medium x5</option>
-<option value="hard">Hard x10</option>
-<option value="extreme">Extreme x15</option>
-<option value="insane">Insane x20</option>
-</select>
-</div><h2>Găsește bila</h2><div class="table" id="table">
-<div id="ball" class="ball"></div>
-</div><div class="bet-row">
-<button onclick="setBet(1000)">1000</button>
-<button onclick="setBet(5000)">5000</button>
-<button onclick="setBet(10000)">10000</button>
-<button onclick="allIn()">ALL IN</button>
-</div><button onclick="startRound()">START</button> <button class="secondary" onclick="logout()">Logout</button> <button class="donate" onclick="window.open('https://revolut.me/jdrel21','_blank')">💜 Susține proiectul</button>
-
-<div class="stats">
-<div>Victorii: <span id="wins">0</span></div>
-<div>Înfrângeri: <span id="loss">0</span></div>
-</div><div class="msg" id="msg"></div>
-</div><audio id="winSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3"></audio> <audio id="shuffleSound" src="https://assets.mixkit.co/sfx/preview/mixkit-card-shuffle-2036.mp3"></audio>
-
-<script>
-
-const SUPABASE_URL="https://pakagqkhpwzcqrluyarw.supabase.co";
-const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBha2FncWtocHd6Y3FybHV5YXJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5OTg2NTgsImV4cCI6MjA4NjU3NDY1OH0.l24o0QSKN7Dnn9O3ptimbCNqAs6yzO3KnDIb2JxsYwA";
-const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-
-let userData=null;
-let coins=0,wins=0,loss=0;
-let cups=[],slots=[],ballCup=null,playing=false,bet=5000;
-
-async function register(){
- const email=document.getElementById('email').value.trim();
- const pass=document.getElementById('pass').value.trim();
- if(pass.length<6) return alert("Parolă minim 6 caractere");
- const {error}=await sb.auth.signUp({email,password:pass});
- if(error) return alert(error.message);
- alert("Cont creat.");
+.auth-subtitle {
+  color: var(--text-secondary);
+  margin-bottom: 40px;
+  font-size: 1.1rem;
 }
 
-async function login(){
- const email=document.getElementById('email').value.trim();
- const pass=document.getElementById('pass').value.trim();
- const {error}=await sb.auth.signInWithPassword({email,password:pass});
- if(error) return alert(error.message);
- initGame();
+.input-group {
+  margin-bottom: 20px;
+  text-align: left;
 }
 
-async function logout(){ await sb.auth.signOut(); location.reload(); }
-
-sb.auth.onAuthStateChange((event,session)=>{ if(session?.user){ initGame(); }});
-
-async function initGame(){
- const {data:{user}}=await sb.auth.getUser();
- if(!user) return;
- userData=user;
- document.getElementById('auth').classList.add('hidden');
- document.getElementById('game').classList.remove('hidden');
-
- let {data}=await sb.from('players').select('*').eq('id',user.id).maybeSingle();
- if(!data){
-  await sb.from('players').insert({ id:user.id,email:user.email,coins:100000,wins:0,loss:0 });
-  return initGame();
- }
- coins=data.coins;
- wins=data.wins;
- loss=data.loss;
- updateHUD();
- createCups();
+.input-group label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  font-weight: 500;
 }
 
-function updateHUD(){
- document.getElementById('coins').innerText=coins;
- document.getElementById('wins').innerText=wins;
- document.getElementById('loss').innerText=loss;
+.input-group input {
+  width: 100%;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-family: inherit;
+  transition: all 0.3s ease;
 }
 
-function msg(t){ document.getElementById('msg').innerText=t; }
-function setBet(v){bet=v;msg("Pariu: "+v);} 
-function allIn(){bet=coins;msg("ALL IN");}
-
-function getCupCount(){
- const lvl=document.getElementById('level').value;
- if(lvl==='easy') return 3;
- if(lvl==='medium') return 4;
- if(lvl==='hard') return 5;
- if(lvl==='extreme') return 6;
- if(lvl==='insane') return 7;
+.input-group input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
 }
 
-function createCups(){
- const table=document.getElementById('table');
- table.querySelectorAll('.cup').forEach(c=>c.remove());
- cups=[]; slots=[];
-
- const count=getCupCount();
- const width=table.clientWidth;
- const spacing=width/(count+1);
-
- for(let i=0;i<count;i++){
-  const pos=spacing*(i+1)-27;
-  slots.push(pos);
-  const cup=document.createElement('div');
-  cup.className='cup';
-  cup.style.left=pos+'px';
-  table.appendChild(cup);
-  cups.push(cup);
- }
+.input-group input::placeholder {
+  color: var(--text-muted);
 }
 
-function attachBall(cup){ ballCup=cup; moveBall(); document.getElementById('ball').style.opacity=1; }
-function moveBall(){ const index=cups.indexOf(ballCup); document.getElementById('ball').style.left=(slots[index]+20)+'px'; }
-function hideBall(){ document.getElementById('ball').style.opacity=0; }
-function resetCups(){ cups.forEach(c=>c.classList.remove('lift','glow')); }
-
-function shuffleArray(){
- const count=cups.length;
- const swaps=count*3;
- for(let i=0;i<swaps;i++){
-  const a=Math.floor(Math.random()*count);
-  const b=Math.floor(Math.random()*count);
-  [cups[a],cups[b]]=[cups[b],cups[a]];
- }
- cups.forEach((cup,index)=>{ cup.style.left=slots[index]+'px'; });
- moveBall();
+.btn {
+  width: 100%;
+  padding: 18px 32px;
+  border: none;
+  border-radius: 16px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 12px;
 }
 
-function startRound(){
- if(playing) return;
- if(coins<bet) return msg("Nu ai coins");
-
- resetCups();
- attachBall(cups[Math.floor(Math.random()*cups.length)]);
- coins-=bet;
- updateHUD();
- msg("Urmărește bila...");
-
- const lvl=document.getElementById('level').value;
- let speed=220,times=14,multi=3;
-
- if(lvl==='easy'){speed=340;times=12;multi=3;}
- if(lvl==='medium'){speed=240;times=16;multi=5;}
- if(lvl==='hard'){speed=190;times=20;multi=10;}
- if(lvl==='extreme'){speed=160;times=24;multi=15;}
- if(lvl==='insane'){speed=130;times=28;multi=20;}
-
- speed=Math.floor(speed*0.85);
-
- setTimeout(()=>{
-  hideBall();
-  document.getElementById('shuffleSound').play();
-  let i=0;
-  const loop=setInterval(()=>{
-   shuffleArray();
-   i++;
-   if(i>=times){
-    clearInterval(loop);
-    playing=true;
-    msg("Alege un pahar!");
-    cups.forEach(c=>c.onclick=()=>pick(c,multi));
-   }
-  },speed);
- },900);
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  color: var(--bg-dark);
+  box-shadow: 0 8px 32px rgba(212, 175, 55, 0.3);
 }
 
-async function pick(cup,multi){
- if(!playing) return;
- playing=false;
- resetCups();
- cup.classList.add('lift');
- document.getElementById('ball').style.opacity=1;
-
- if(cup===ballCup){
-  const win=bet*multi;
-  coins+=win;
-  wins++;
-  document.getElementById('winSound').play();
-  cup.classList.add('glow');
-  msg("🔥 AI CÂȘTIGAT "+win);
- }else{
-  loss++;
-  ballCup.classList.add('lift');
-  msg("❌ Ai pierdut");
- }
-
- updateHUD();
- await sb.from('players').update({coins,wins,loss}).eq('id',userData.id);
+.btn-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(212, 175, 55, 0.4);
 }
 
-window.addEventListener('resize',createCups);
+.btn-gold:active {
+  transform: translateY(0);
+}
 
-</script></body>
-</html>
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  margin: 24px 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.auth-divider span {
+  padding: 0 16px;
+}
+
+/* ========== GAME CONTAINER ========== */
+.game-container {
+  min-height: 100vh;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.hidden { display: none !important; }
+
+/* ========== NAVBAR ========== */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-radius: 20px;
+  margin-bottom: 24px;
+}
+
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-logo svg {
+  width: 32px;
+  height: 32px;
+}
+
+.nav-stats {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+}
+
+.stat-icon {
+  font-size: 1.2rem;
+}
+
+.stat-value {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--gold);
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.btn-logout {
+  padding: 10px 20px;
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  border-radius: 12px;
+  color: var(--red);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+  background: rgba(220, 38, 38, 0.2);
+}
+
+/* ========== MAIN GAME AREA ========== */
+.game-main {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+@media (max-width: 1100px) {
+  .game-main {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ========== GAME TABLE ========== */
+.table-container {
+  border-radius: 32px;
+  padding: 32px;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.table-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.difficulty-select {
+  display: flex;
+  gap: 8px;
+}
+
+.diff-btn {
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.diff-btn.active {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--bg-dark);
+}
+
+.diff-btn:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ========== FELT TABLE ========== */
+.felt-table {
+  position: relative;
+  width: 100%;
+  height: 380px;
+  border-radius: 180px / 60px;
+  background: radial-gradient(ellipse at center, var(--felt-light) 0%, var(--felt-dark) 100%);
+  margin: 32px 0;
+  box-shadow: 
+    inset 0 0 60px rgba(0, 0, 0, 0.5),
+    0 20px 60px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.felt-table::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.felt-table::after {
+  content: '';
+  position: absolute;
+  inset: 20px;
+  border: 2px solid rgba(212, 175, 55, 0.15);
+  border-radius: 160px / 50px;
+  pointer-events: none;
+}
+
+/* ========== CUPS ========== */
+.cup {
+  position: absolute;
+  width: 70px;
+  height: 100px;
+  bottom: 38%;
+  cursor: pointer;
+  transform-origin: bottom center;
+  transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s ease;
+  filter: drop-shadow(0 15px 20px rgba(0, 0, 0, 0.5));
+}
+
+.cup-body {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, 
+    #c9a227 0%, 
+    #f4d03f 20%, 
+    #c9a227 40%, 
+    #8b6914 60%, 
+    #f4d03f 80%, 
+    #c9a227 100%);
+  border-radius: 50% 50% 5px 5px / 30% 30% 5px 5px;
+  position: relative;
+  box-shadow: 
+    inset -8px 0 20px rgba(0, 0, 0, 0.3),
+    inset 8px 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.cup-body::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 10px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  border-radius: 50%;
+}
+
+.cup-body::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 15px;
+  background: linear-gradient(180deg, #8b6914, #5c4a0f);
+  border-radius: 0 0 5px 5px;
+}
+
+.cup.lifted {
+  transform: translateY(-120px) rotateX(15deg);
+}
+
+.cup.glow .cup-body {
+  box-shadow: 
+    0 0 30px var(--gold),
+    0 0 60px var(--gold),
+    inset -8px 0 20px rgba(0, 0, 0, 0.3),
+    inset 8px 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.cup:hover:not(.lifted) {
+  transform: translateY(-8px);
+}
+
+/* ========== BALL ========== */
+.ball {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  bottom: 35%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #fff, #ff1744 40%, #b71c1c);
+  box-shadow: 
+    0 5px 15px rgba(0, 0, 0, 0.5),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.3),
+    inset 0 3px 8px rgba(255, 255, 255, 0.3);
+  transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
+  z-index: 5;
+}
+
+/* ========== MESSAGE ========== */
+.game-message {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.game-message.win {
+  color: var(--gold);
+  text-shadow: 0 0 30px var(--gold);
+}
+
+.game-message.lose {
+  color: var(--red);
+}
+
+/* ========== BETTING PANEL ========== */
+.betting-section {
+  margin-top: 32px;
+}
+
+.bet-display {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.bet-label {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.bet-amount {
+  font-family: 'Playfair Display', serif;
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+}
+
+.bet-chips {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.chip {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: none;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.chip::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 3px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+}
+
+.chip:hover {
+  transform: translateY(-5px) scale(1.05);
+}
+
+.chip:active {
+  transform: translateY(-2px) scale(1);
+}
+
+.chip-1k { background: linear-gradient(135deg, #3b82f6, #1d4ed8); box-shadow: 0 6px 0 #1e40af, 0 10px 20px rgba(59, 130, 246, 0.4); }
+.chip-5k { background: linear-gradient(135deg, #22c55e, #15803d); box-shadow: 0 6px 0 #166534, 0 10px 20px rgba(34, 197, 94, 0.4); }
+.chip-10k { background: linear-gradient(135deg, #dc2626, #991b1b); box-shadow: 0 6px 0 #7f1d1d, 0 10px 20px rgba(220, 38, 38, 0.4); }
+.chip-25k { background: linear-gradient(135deg, #7c3aed, #5b21b6); box-shadow: 0 6px 0 #4c1d95, 0 10px 20px rgba(124, 58, 237, 0.4); }
+.chip-allin { background: linear-gradient(135deg, var(--gold), var(--gold-dark)); box-shadow: 0 6px 0 #7a5c0f, 0 10px 20px rgba(212, 175, 55, 0.4); color: var(--bg-dark); }
+
+.action-buttons {
+  display: flex;
+  gap: 16px;
+}
+
+.btn-start {
+  flex: 1;
+  padding: 20px;
+  font-size: 1.2rem;
+}
+
+/* ========== SIDEBAR ========== */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sidebar-card {
+  border-radius: 24px;
+  padding: 24px;
+}
+
+.sidebar-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ========== MULTIPLIERS INFO ========== */
+.multiplier-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.multiplier-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+}
+
+.multiplier-level {
+  font-weight: 500;
+}
+
+.multiplier-value {
+  font-weight: 700;
+  color: var(--gold);
+}
+
+/* ========== STATS CARD ========== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.stats-item {
+  text-align: center;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+}
+
+.stats-number {
+  font-size: 1.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.stats-number.green { color: var(--green); }
+.stats-number.red { color: var(--red); }
+.stats-number.gold { color: var(--gold); }
+
+.stats-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ========== HISTORY ========== */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+
+.history-result {
+  font-weight: 600;
+}
+
+.history-result.win { color: var(--green); }
+.history-result.lose { color: var(--red); }
+
+/* ========== DONATE ========== */
+.donate-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #6200ea, #aa00ff);
+  border: none;
+  border-radius: 16px;
+  color: white;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.donate-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(98, 0, 234, 0.4);
+}
+
+/* ========== CONFETTI ========== */
+.confetti {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .nav-stats {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .difficulty-select {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .felt-table {
+    height: 320px;
+    border-radius: 100px / 40px;
+  }
+  
+  .cup {
+    width: 55px;
+    height: 80px;
+  }
+  
+  .ball {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .bet-chips {
+    gap: 8px;
+  }
+  
+  .chip {
+    width: 54px;
+    height: 54px;
+    font-size: 0.75rem;
+  }
+}
+
+/* ========== SCROLLBAR ========== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 3px;
+}
+</style>
+</head>
+<body>
+
+<!-- Particles Background -->
+<div class="particles" id="particles"></div>
+
+<!-- ========== AUTH SCREEN ========== -->
+<div id="auth" class="auth-container">
+  <div class="auth-panel glass">
+    <div class="auth-logo">Shadow Cups</div>
+    <p class="auth-subtitle">Jocul clasic al paharelor, reinventat</p>
+    
+    <div class="input-group">
+      <label>Email</label>
+      <input type="email" id="email" placeholder="nume@exemplu.com">
+    </div>
+    
+    <div class="input-group">
+      <label>ParolÄ</label>
+      <input type="password" id="pass" placeholder="Minim 6 caractere">
+    </div>
+    
+    <button class="btn btn-gold" onclick="login()">Autentificare</button>
+    
+    <div class="auth-divider"><span>sau</span></div>
+    
+    <button class="btn btn-secondary" onclick="register()">CreeazÄ cont nou</button>
+    
+    <button class="btn" style="margin-top: 20px; background: linear-gradient(135deg, #22c55e, #15803d); color: white;" onclick="playDemo()">đŽ JoacÄ Demo (fÄrÄ cont)</button>
+  </div>
+</div>
+
+<!-- ========== GAME SCREEN ========== -->
+<div id="game" class="game-container hidden">
+  
+  <!-- Navbar -->
+  <nav class="navbar glass">
+    <div class="nav-logo">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+        <circle cx="12" cy="12" r="5" fill="currentColor"/>
+      </svg>
+      Shadow Cups
+    </div>
+    
+    <div class="nav-stats">
+      <div class="stat-item">
+        <span class="stat-icon">đ°</span>
+        <div>
+          <div class="stat-value" id="coins">0</div>
+          <div class="stat-label">Coins</div>
+        </div>
+      </div>
+      <div class="stat-item">
+        <span class="stat-icon">đ</span>
+        <div>
+          <div class="stat-value" id="wins">0</div>
+          <div class="stat-label">Victorii</div>
+        </div>
+      </div>
+      <div class="stat-item">
+        <span class="stat-icon">đ</span>
+        <div>
+          <div class="stat-value" id="winrate">0%</div>
+          <div class="stat-label">Win Rate</div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+  
+  <!-- Main Game Area -->
+  <div class="game-main">
+    
+    <!-- Game Table Section -->
+    <div class="table-container glass">
+      <div class="table-header">
+        <h2 class="table-title">GÄseČte Bila</h2>
+        <div class="difficulty-select">
+          <button class="diff-btn active" data-level="easy" onclick="setDifficulty('easy')">Easy</button>
+          <button class="diff-btn" data-level="medium" onclick="setDifficulty('medium')">Medium</button>
+          <button class="diff-btn" data-level="hard" onclick="setDifficulty('hard')">Hard</button>
+          <button class="diff-btn" data-level="extreme" onclick="setDifficulty('extreme')">Extreme</button>
+          <button class="diff-btn" data-level="insane" onclick="setDifficulty('insane')">Insane</button>
+        </div>
+      </div>
+      
+      <!-- Felt Table -->
+      <div class="felt-table" id="table">
+        <div class="ball" id="ball"></div>
+      </div>
+      
+      <!-- Message -->
+      <div class="game-message" id="msg">PlaseazÄ un pariu Či apasÄ START</div>
+      
+      <!-- Betting Section -->
+      <div class="betting-section">
+        <div class="bet-display">
+          <div class="bet-label">Pariu curent</div>
+          <div class="bet-amount" id="betDisplay">5,000</div>
+        </div>
+        
+        <div class="bet-chips">
+          <button class="chip chip-1k" onclick="setBet(1000)">1K</button>
+          <button class="chip chip-5k" onclick="setBet(5000)">5K</button>
+          <button class="chip chip-10k" onclick="setBet(10000)">10K</button>
+          <button class="chip chip-25k" onclick="setBet(25000)">25K</button>
+          <button class="chip chip-allin" onclick="allIn()">ALL IN</button>
+        </div>
+        
+        <div class="action-buttons">
+          <button class="btn btn-gold btn-start" onclick="startRound()">
+            đ˛ START RUNDA
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="sidebar">
+      
+      <!-- Multipliers -->
+      <div class="sidebar-card glass">
+        <h3 class="sidebar-title">đŻ Multiplicatori</h3>
+        <div class="multiplier-list">
+          <div class="multiplier-item">
+            <span class="multiplier-level">Easy (3 pahare)</span>
+            <span class="multiplier-value">x3</span>
+          </div>
+          <div class="multiplier-item">
+            <span class="multiplier-level">Medium (4 pahare)</span>
+            <span class="multiplier-value">x5</span>
+          </div>
+          <div class="multiplier-item">
+            <span class="multiplier-level">Hard (5 pahare)</span>
+            <span class="multiplier-value">x10</span>
+          </div>
+          <div class="multiplier-item">
+            <span cla
