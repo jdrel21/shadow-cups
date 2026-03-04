@@ -1,342 +1,181 @@
-<!DOCTYPE html><html lang="ro">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shadow Cups</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script><style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-
-body{
- margin:0;
- font-family:'Segoe UI',sans-serif;
- background:radial-gradient(circle at top,#021018,#000);
- color:white;
- min-height:100vh;
- display:flex;
- justify-content:center;
- align-items:center;
-}
-
-.panel{
- width:100%;
- max-width:1400px;
- background:linear-gradient(160deg,#0b2a3d,#04141c);
- border-radius:26px;
- padding:26px;
- box-shadow:0 60px 180px rgba(0,0,0,.95);
- position:relative;
-}
-
-.hidden{display:none}
-
-input,select{
- width:100%;
- padding:14px;
- border:none;
- border-radius:14px;
- margin:14px 0;
-}
-
-button{
- width:100%;
- padding:16px;
- border:none;
- border-radius:16px;
- font-weight:bold;
- cursor:pointer;
- background:linear-gradient(90deg,#00e676,#00c853);
- transition:.2s;
- margin-top:14px;
-}
-
-button:active{transform:scale(.96)}
-.secondary{background:#ff5252}
-
-.topbar{
- display:flex;
- justify-content:space-between;
- font-weight:bold;
- margin-bottom:18px;
-}
-
-/* MASA RESPONSIVE FULL WIDTH */
-.table{
- position:relative;
- width:100%;
- min-height:420px;
- height:60vh;
- max-height:750px;
- margin:60px 0;
- border-radius:60px;
- background:radial-gradient(circle at center,#0a6c94,#010b12);
- overflow:hidden;
-}
-
-/* PAHARE MAI MICI */
-.cup{
- width:55px;
- height:85px;
- position:absolute;
- bottom:22%;
- border-radius:45px 45px 0 0;
- background:linear-gradient(#ffc46b,#ff6d00);
- box-shadow:0 10px 25px rgba(0,0,0,.8);
- transition:left .5s cubic-bezier(.4,0,.2,1), transform .25s ease;
-}
-
-.glow{ box-shadow:0 0 25px gold,0 0 50px orange; }
-.lift{ transform:translateY(-65px); }
-
-/* BILA */
-.ball{
- width:14px;
- height:14px;
- border-radius:50%;
- background:radial-gradient(circle,#fff,#ff1744);
- position:absolute;
- bottom:19%;
- transition:left .5s cubic-bezier(.4,0,.2,1), opacity .2s;
-}
-
-.bet-row{ display:flex; gap:18px; margin-top:20px; }
-.bet-row button{ flex:1; }
-
-.stats{ display:flex; justify-content:space-between; margin-top:18px; }
-.msg{ text-align:center; font-weight:bold; margin-top:16px; }
-
-.side-video{
- position:absolute;
- top:50%;
- transform:translateY(-50%);
- width:200px;
- opacity:.35;
-}
-.left-video{ left:-240px; }
-.right-video{ right:-240px; }
-.side-video video{
- width:100%;
- border-radius:20px;
-}
-
-.donate{
- margin-top:20px;
- background:linear-gradient(90deg,#6200ea,#aa00ff);
-}
-
-/* MOBILE FIX */
-@media (max-width:900px){
- .panel{max-width:100%;border-radius:0}
- .side-video{display:none}
- .table{height:55vh;min-height:350px}
-}
-
-</style></head><body><div id="auth" class="panel">
-<h1>🎰 Shadow Cups</h1>
-<input id="email" placeholder="Email">
-<input id="pass" type="password" placeholder="Parolă (min 6)">
-<button onclick="register()">Înregistrare</button>
-<button onclick="login()">Login</button>
-</div><div id="game" class="panel hidden"><div class="side-video left-video">
-<video autoplay muted loop playsinline>
-<source src="https://cdn.coverr.co/videos/coverr-casino-table-1605/1080p.mp4" type="video/mp4">
-</video>
-</div><div class="side-video right-video">
-<video autoplay muted loop playsinline>
-<source src="https://cdn.coverr.co/videos/coverr-casino-table-1605/1080p.mp4" type="video/mp4">
-</video>
-</div><div class="topbar">
-<div>💰 Coins: <span id="coins">0</span></div>
-<select id="level" onchange="createCups()">
-<option value="easy">Easy x3</option>
-<option value="medium">Medium x5</option>
-<option value="hard">Hard x10</option>
-<option value="extreme">Extreme x15</option>
-<option value="insane">Insane x20</option>
-</select>
-</div><h2>Găsește bila</h2><div class="table" id="table">
-<div id="ball" class="ball"></div>
-</div><div class="bet-row">
-<button onclick="setBet(1000)">1000</button>
-<button onclick="setBet(5000)">5000</button>
-<button onclick="setBet(10000)">10000</button>
-<button onclick="allIn()">ALL IN</button>
-</div><button onclick="startRound()">START</button> <button class="secondary" onclick="logout()">Logout</button> <button class="donate" onclick="window.open('https://revolut.me/jdrel21','_blank')">💜 Susține proiectul</button>
-
-<div class="stats">
-<div>Victorii: <span id="wins">0</span></div>
-<div>Înfrângeri: <span id="loss">0</span></div>
-</div><div class="msg" id="msg"></div>
-</div><audio id="winSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3"></audio> <audio id="shuffleSound" src="https://assets.mixkit.co/sfx/preview/mixkit-card-shuffle-2036.mp3"></audio>
-
-<script>
-
-const SUPABASE_URL="https://pakagqkhpwzcqrluyarw.supabase.co";
-const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBha2FncWtocHd6Y3FybHV5YXJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5OTg2NTgsImV4cCI6MjA4NjU3NDY1OH0.l24o0QSKN7Dnn9O3ptimbCNqAs6yzO3KnDIb2JxsYwA";
-const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-
-let userData=null;
-let coins=0,wins=0,loss=0;
-let cups=[],slots=[],ballCup=null,playing=false,bet=5000;
-
-async function register(){
- const email=document.getElementById('email').value.trim();
- const pass=document.getElementById('pass').value.trim();
- if(pass.length<6) return alert("Parolă minim 6 caractere");
- const {error}=await sb.auth.signUp({email,password:pass});
- if(error) return alert(error.message);
- alert("Cont creat.");
-}
-
-async function login(){
- const email=document.getElementById('email').value.trim();
- const pass=document.getElementById('pass').value.trim();
- const {error}=await sb.auth.signInWithPassword({email,password:pass});
- if(error) return alert(error.message);
- initGame();
-}
-
-async function logout(){ await sb.auth.signOut(); location.reload(); }
-
-sb.auth.onAuthStateChange((event,session)=>{ if(session?.user){ initGame(); }});
-
-async function initGame(){
- const {data:{user}}=await sb.auth.getUser();
- if(!user) return;
- userData=user;
- document.getElementById('auth').classList.add('hidden');
- document.getElementById('game').classList.remove('hidden');
-
- let {data}=await sb.from('players').select('*').eq('id',user.id).maybeSingle();
- if(!data){
-  await sb.from('players').insert({ id:user.id,email:user.email,coins:100000,wins:0,loss:0 });
-  return initGame();
- }
- coins=data.coins;
- wins=data.wins;
- loss=data.loss;
- updateHUD();
- createCups();
-}
-
-function updateHUD(){
- document.getElementById('coins').innerText=coins;
- document.getElementById('wins').innerText=wins;
- document.getElementById('loss').innerText=loss;
-}
-
-function msg(t){ document.getElementById('msg').innerText=t; }
-function setBet(v){bet=v;msg("Pariu: "+v);} 
-function allIn(){bet=coins;msg("ALL IN");}
-
-function getCupCount(){
- const lvl=document.getElementById('level').value;
- if(lvl==='easy') return 3;
- if(lvl==='medium') return 4;
- if(lvl==='hard') return 5;
- if(lvl==='extreme') return 6;
- if(lvl==='insane') return 7;
-}
-
-function createCups(){
- const table=document.getElementById('table');
- table.querySelectorAll('.cup').forEach(c=>c.remove());
- cups=[]; slots=[];
-
- const count=getCupCount();
- const width=table.clientWidth;
- const spacing=width/(count+1);
-
- for(let i=0;i<count;i++){
-  const pos=spacing*(i+1)-27;
-  slots.push(pos);
-  const cup=document.createElement('div');
-  cup.className='cup';
-  cup.style.left=pos+'px';
-  table.appendChild(cup);
-  cups.push(cup);
- }
-}
-
-function attachBall(cup){ ballCup=cup; moveBall(); document.getElementById('ball').style.opacity=1; }
-function moveBall(){ const index=cups.indexOf(ballCup); document.getElementById('ball').style.left=(slots[index]+20)+'px'; }
-function hideBall(){ document.getElementById('ball').style.opacity=0; }
-function resetCups(){ cups.forEach(c=>c.classList.remove('lift','glow')); }
-
-function shuffleArray(){
- const count=cups.length;
- const swaps=count*3;
- for(let i=0;i<swaps;i++){
-  const a=Math.floor(Math.random()*count);
-  const b=Math.floor(Math.random()*count);
-  [cups[a],cups[b]]=[cups[b],cups[a]];
- }
- cups.forEach((cup,index)=>{ cup.style.left=slots[index]+'px'; });
- moveBall();
-}
-
-function startRound(){
- if(playing) return;
- if(coins<bet) return msg("Nu ai coins");
-
- resetCups();
- attachBall(cups[Math.floor(Math.random()*cups.length)]);
- coins-=bet;
- updateHUD();
- msg("Urmărește bila...");
-
- const lvl=document.getElementById('level').value;
- let speed=220,times=14,multi=3;
-
- if(lvl==='easy'){speed=340;times=12;multi=3;}
- if(lvl==='medium'){speed=240;times=16;multi=5;}
- if(lvl==='hard'){speed=190;times=20;multi=10;}
- if(lvl==='extreme'){speed=160;times=24;multi=15;}
- if(lvl==='insane'){speed=130;times=28;multi=20;}
-
- speed=Math.floor(speed*0.85);
-
- setTimeout(()=>{
-  hideBall();
-  document.getElementById('shuffleSound').play();
-  let i=0;
-  const loop=setInterval(()=>{
-   shuffleArray();
-   i++;
-   if(i>=times){
-    clearInterval(loop);
-    playing=true;
-    msg("Alege un pahar!");
-    cups.forEach(c=>c.onclick=()=>pick(c,multi));
-   }
-  },speed);
- },900);
-}
-
-async function pick(cup,multi){
- if(!playing) return;
- playing=false;
- resetCups();
- cup.classList.add('lift');
- document.getElementById('ball').style.opacity=1;
-
- if(cup===ballCup){
-  const win=bet*multi;
-  coins+=win;
-  wins++;
-  document.getElementById('winSound').play();
-  cup.classList.add('glow');
-  msg("🔥 AI CÂȘTIGAT "+win);
- }else{
-  loss++;
-  ballCup.classList.add('lift');
-  msg("❌ Ai pierdut");
- }
-
- updateHUD();
- await sb.from('players').update({coins,wins,loss}).eq('id',userData.id);
-}
-
-window.addEventListener('resize',createCups);
-
-</script></body>
-</html>
+1|<!doctype html>
+2|<html lang="ro">
+3|    <head>
+4|        <meta charset="utf-8" />
+5|        <meta name="viewport" content="width=device-width, initial-scale=1" />
+6|        <meta name="theme-color" content="#000000" />
+7|        <meta name="description" content="A product of emergent.sh" />
+8|        <link rel="preconnect" href="https://fonts.googleapis.com" />
+9|        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+10|        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet" />
+11|        <!--
+12|        manifest.json provides metadata used when your web app is installed on a
+13|        user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+14|        -->
+15|        <!--
+16|        Notice the use of %PUBLIC_URL% in the tags above.
+17|        It will be replaced with the URL of the `public` folder during the build.
+18|        Only files inside the `public` folder can be referenced from the HTML.
+19|
+20|        Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
+21|        work correctly both with client-side routing and a non-root public URL.
+22|        Learn how to configure a non-root public URL by running `npm run build`.
+23|        -->
+24|        <title>Emergent | Fullstack App</title>
+25|        <script>window.addEventListener("error",function(e){if(e.error instanceof DOMException&&e.error.name==="DataCloneError"&&e.message&&e.message.includes("PerformanceServerTiming")){e.stopImmediatePropagation();e.preventDefault()}},true);</script>
+26|        <script src="https://assets.emergent.sh/scripts/emergent-main.js"></script>
+27|        <!--
+28|        These two scripts have been added for the Visual Edits, please do not edit or remove them
+29|        -->
+30|        <script>
+31|            // Only load visual edit scripts when inside an iframe
+32|            if (window.self !== window.top) {
+33|                // Load debug monitor script
+34|                var debugMonitorScript = document.createElement('script');
+35|                debugMonitorScript.src = 'https://assets.emergent.sh/scripts/debug-monitor.js';
+36|                document.head.appendChild(debugMonitorScript);
+37|
+38|                // Configure Tailwind
+39|                window.tailwind = window.tailwind || {};
+40|                tailwind.config = {
+41|                    corePlugins: { preflight: false },
+42|                };
+43|
+44|                // Load Tailwind CDN
+45|                var tailwindScript = document.createElement('script');
+46|                tailwindScript.src = 'https://cdn.tailwindcss.com';
+47|                document.head.appendChild(tailwindScript);
+48|            }
+49|        </script>
+50|    </head>
+51|    <body>
+52|        <noscript>You need to enable JavaScript to run this app.</noscript>
+53|        <div id="root"></div>
+54|        <!--
+55|      This HTML file is a template.
+56|      If you open it directly in the browser, you will see an empty page.
+57|
+58|      You can add webfonts, meta tags, or analytics to this file.
+59|      The build step will place the bundled scripts into the <body> tag.
+60|
+61|      To begin the development, run `npm start` or `yarn start`.
+62|      To create a production bundle, use `npm run build` or `yarn build`.
+63|    -->
+64|        <a
+65|            id="emergent-badge"
+66|            target="_blank"
+67|            href="https://app.emergent.sh/?utm_source=emergent-badge"
+68|            style="
+69|                display: inline-flex !important;
+70|                box-sizing: border-box;
+71|                width: 178px;
+72|                height: 40px;
+73|                padding: 8px 12px 8px 12px;
+74|                align-items: center !important;
+75|                gap: 8px;
+76|                border-radius: 50px !important;
+77|                background: #000 !important;
+78|                position: fixed !important;
+79|                bottom: 16px;
+80|                right: 16px;
+81|                text-decoration: none;
+82|                font-family: -apple-system, BlinkMacSystemFont,
+83|                    &quot;Segoe UI&quot;, Roboto, Oxygen, Ubuntu, Cantarell,
+84|                    &quot;Open Sans&quot;, &quot;Helvetica Neue&quot;,
+85|                    sans-serif !important;
+86|                font-size: 12px !important;
+87|                z-index: 9999 !important;
+88|            "
+89|        >
+90|            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+91|                <path d="M15.5702 8.13142C15.7729 8.0412 16.0007 8.18878 15.9892 8.4103C15.8374 11.3192 14.0965 14.0405 11.2531 15.3065C8.40964 16.5725 5.2224 16.0453 2.95912 14.2117C2.78676 14.072 2.82955 13.804 3.03219 13.7137L4.95677 12.8568C5.04866 12.8159 5.15446 12.823 5.24204 12.8725C6.73377 13.7153 8.59176 13.8649 10.2772 13.1145C11.9626 12.3641 13.0947 10.8833 13.4665 9.21075C13.4883 9.11256 13.5539 9.02918 13.6457 8.98827L15.5702 8.13142Z" fill="white"/>
+92|                <path fill-rule="evenodd" clip-rule="evenodd" d="M15.3066 4.74698L15.5067 5.19653C15.5759 5.35178 15.5061 5.53366 15.3508 5.60278L1.29992 11.8586C1.14467 11.9278 0.962794 11.8579 0.893675 11.7027L0.701732 11.2716L0.693457 11.2531C-1.10317 7.21778 0.711626 2.49007 4.74692 0.693443C8.78221 -1.10318 13.51 0.711693 15.3066 4.74698ZM2.82356 8.55367C2.63552 8.63739 2.41991 8.51617 2.40853 8.31065C2.28373 6.05724 3.53858 3.85787 5.72286 2.88536C7.90715 1.91286 10.3813 2.45199 11.9724 4.05256C12.1175 4.19854 12.0633 4.43988 11.8753 4.5236L2.82356 8.55367Z" fill="white"/>
+93|            </svg>
+94|            <p
+95|                style="
+96|                    color: #FFF !important;
+97|                    font-family: 'Inter', sans-serif !important;
+98|                    font-size: 13px !important;
+99|                    font-style: normal !important;
+100|                    font-weight: 600 !important;
+101|                    line-height: 20px !important;
+102|                    margin: 0 !important;
+103|                    white-space: nowrap !important;
+104|                "
+105|            >
+106|                Made with Emergent
+107|            </p>
+108|        </a>
+109|        <script>
+110|            !(function (t, e) {
+111|                var o, n, p, r;
+112|                e.__SV ||
+113|                    ((window.posthog = e),
+114|                    (e._i = []),
+115|                    (e.init = function (i, s, a) {
+116|                        function g(t, e) {
+117|                            var o = e.split(".");
+118|                            2 == o.length && ((t = t[o[0]]), (e = o[1])),
+119|                                (t[e] = function () {
+120|                                    t.push(
+121|                                        [e].concat(
+122|                                            Array.prototype.slice.call(
+123|                                                arguments,
+124|                                                0,
+125|                                            ),
+126|                                        ),
+127|                                    );
+128|                                });
+129|                        }
+130|                        ((p = t.createElement("script")).type =
+131|                            "text/javascript"),
+132|                            (p.crossOrigin = "anonymous"),
+133|                            (p.async = !0),
+134|                            (p.src =
+135|                                s.api_host.replace(
+136|                                    ".i.posthog.com",
+137|                                    "-assets.i.posthog.com",
+138|                                ) + "/static/array.js"),
+139|                            (r =
+140|                                t.getElementsByTagName(
+141|                                    "script",
+142|                                )[0]).parentNode.insertBefore(p, r);
+143|                        var u = e;
+144|                        for (
+145|                            void 0 !== a ? (u = e[a] = []) : (a = "posthog"),
+146|                                u.people = u.people || [],
+147|                                u.toString = function (t) {
+148|                                    var e = "posthog";
+149|                                    return (
+150|                                        "posthog" !== a && (e += "." + a),
+151|                                        t || (e += " (stub)"),
+152|                                        e
+153|                                    );
+154|                                },
+155|                                u.people.toString = function () {
+156|                                    return u.toString(1) + ".people (stub)";
+157|                                },
+158|                                o =
+159|                                    "init me ws ys ps bs capture je Di ks register register_once register_for_session unregister unregister_for_session Ps getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey canRenderSurveyAsync identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty Es $s createPersonProfile Is opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing Ss debug xs getPageViewId captureTraceFeedback captureTraceMetric".split(
+160|                                        " ",
+161|                                    ),
+162|                                n = 0;
+163|                            n < o.length;
+164|                            n++
+165|                        )
+166|                            g(u, o[n]);
+167|                        e._i.push([i, s, a]);
+168|                    }),
+169|                    (e.__SV = 1));
+170|            })(document, window.posthog || []);
+171|            posthog.init("phc_xAvL2Iq4tFmANRE7kzbKwaSqp1HJjN7x48s3vr0CMjs", {
+172|                api_host: "https://us.i.posthog.com",
+173|                person_profiles: "identified_only", // or 'always' to create profiles for anonymous users as well,
+174|                session_recording: {
+175|                    recordCrossOriginIframes: true,
+176|                    capturePerformance: false,
+177|                },
+178|            });
+179|        </script>
+180|    </body>
+181|</html>
